@@ -55,6 +55,7 @@ const allowedOrigins = [
   'http://localhost:46631',
   'http://localhost:47106',
   'https://tienda-han.onrender.com',
+  'https://tienda-frontend.onrender.com',
 ];
 app.use(cors({
   origin: function (origin, callback) {
@@ -348,8 +349,8 @@ app.get("/newcollections", async (req, res) => {
     // Map through the products to construct the full image URL
     const updatedProducts = newcollection.map(product => {
       // Determine which image to display: edited or main
-      const mainImage = product.image ? `http://localhost:4000/images/${product.image}` : null;
-      const editedImage = product.editedImage ? `http://localhost:4000/images/${product.editedImage}` : null; // Assuming editedImage is stored in the product object
+      const mainImage = product.image ? `https://tienda-backend-au3t.onrender.com/images/${product.image}` : null;
+      const editedImage = product.editedImage ? `https://tienda-backend-au3t.onrender.com/images/${product.editedImage}` : null; // Assuming editedImage is stored in the product object
 
       // Choose the edited image if it exists; otherwise, use the main image
       const imageToDisplay = editedImage || mainImage;
@@ -378,8 +379,8 @@ app.get("/popularincrafts", async (req, res) => {
     // Map through the products to construct the full image URL
     const updatedProducts = popular_in_crafts.map(product => {
       // Determine which image to display: edited or main
-      const mainImage = product.image ? `http://localhost:4000/images/${product.image}` : null;
-      const editedImage = product.editedImage ? `http://localhost:4000/images/${product.editedImage}` : null; // Assuming editedImage is stored in the product object
+      const mainImage = product.image ? `https://tienda-backend-au3t.onrender.com/images/${product.image}` : null;
+      const editedImage = product.editedImage ? `https://tienda-backend-au3t.onrender.com/images/${product.editedImage}` : null; // Assuming editedImage is stored in the product object
 
       // Choose the edited image if it exists; otherwise, use the main image
       const imageToDisplay = editedImage || mainImage;
@@ -462,8 +463,8 @@ app.get("/relatedproducts/:category", async (req, res) => {
     // Map through the related products to construct the full image URL
     const updatedRelatedProducts = relatedProducts.map(product => {
       // Determine which image to display: edited or main
-      const mainImage = product.image ? `http://localhost:4000/images/${product.image}` : null;
-      const editedImage = product.editedImage ? `http://localhost:4000/images/${product.editedImage}` : null; // Assuming editedImage is stored in the product object
+      const mainImage = product.image ? `https://tienda-backend-au3t.onrender.com/images/${product.image}` : null;
+      const editedImage = product.editedImage ? `https://tienda-backend-au3t.onrender.com/images/${product.editedImage}` : null; // Assuming editedImage is stored in the product object
 
       // Choose the edited image if it exists; otherwise, use the main image
       const imageToDisplay = editedImage || mainImage;
