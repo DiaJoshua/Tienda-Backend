@@ -62,6 +62,7 @@ const allowedOrigins = [
 ];
 app.use(cors({
   origin: function (origin, callback) {
+    console.log("Request Origin:", origin);
     // Allow requests with no origin (like mobile apps, curl requests)
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -583,35 +584,47 @@ const generateOTP = () => {
 };
 // In your Express.js backend
 app.post("/forgot-password", async (req, res) => {
-  console.log("Forgot Password route hit");
   const { email } = req.body;
 
-  // Check if email exists in your database
+  // Validate that email is provided
+  if (!email) {
+    return res.status(400).json({ success: false, errors: "Email is required." });
+  }
+
   try {
     // Check if email exists in your database
     const user = await Users.findOne({ email });
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, errors: "User not found." });
+      return res.status(404).json({ success: false, errors: "User not found." });
     }
 
-    // Generate OTP
-    const otp = generateOTP(); // Function to generate OTP
-    user.otp = otp; // Save OTP to user record
-    await user.save();
+    // Generate OTP securely and handle errors if OTP generation fails
+    let otp;
+    try {
+      otp = generateOTP(); // Ensure this function is defined and handles errors internally
+      user.otp = otp; // Save OTP to user record
+      await user.save();
+    } catch (err) {
+      console.error("Error generating OTP:", err);
+      return res.status(500).json({ success: false, errors: "Error generating OTP." });
+    }
 
-    // Send OTP to the user's email
-    await sendEmail(user.email, `Your OTP: ${otp}`);
+    // Send OTP to the user's email, with error handling for sending email
+    try {
+      await sendEmail(user.email, `Your OTP: ${otp}`);
+    } catch (err) {
+      console.error("Error sending OTP email:", err);
+      return res.status(500).json({ success: false, errors: "Error sending OTP email." });
+    }
 
-    return res
-      .status(200)
-      .json({ success: true, message: "OTP sent successfully." });
+    return res.status(200).json({ success: true, message: "OTP sent successfully." });
+
   } catch (error) {
     console.error("Error processing forgot password request:", error);
     res.status(500).json({ success: false, errors: "Internal server error." });
   }
 });
+
 
 app.post("/verify-otp", async (req, res) => {
   const { email, otp, newPassword } = req.body;
@@ -1253,3 +1266,38 @@ app.use("/api/", adminRoutes);
 app.use("/api/seller", sellerRouter);
 app.use("/api", sellerRouter);
 app.use("/api", userRoutes);
+
+
+app.use(helmet({
+  hsts: {
+      maxAge: 31536000, // 1 year in seconds
+      includeSubDomains: true, // Apply HSTS to subdomains
+      preload: true,
+  },
+  contentSecurityPolicy: {
+      directives: {
+          defaultSrc: ["'self'"], 
+          scriptSrc: ["'self'",],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'","data:"],
+          connectSrc: ["'self'"],
+          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+        
+      }
+  },
+
+}))
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'no-referrer'); // Change this based on your needs
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()'); // Adjust as needed
+  next();
+});
