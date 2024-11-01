@@ -11,6 +11,42 @@ const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
 const helmet = require('helmet');
 
+// Helmet for Security
+app.use(helmet({
+  hsts: {
+      maxAge: 31536000, // 1 year in seconds
+      includeSubDomains: true, // Apply HSTS to subdomains
+      preload: true,
+  },
+  contentSecurityPolicy: {
+      directives: {
+          defaultSrc: ["'self'"], 
+          scriptSrc: ["'self'",],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'","data:"],
+          connectSrc: ["'self'"],
+          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+        
+      }
+  },
+
+}))
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'no-referrer'); // Change this based on your needs
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()'); // Adjust as needed
+  next();
+});
+
+
 // import routes
 const adminRoutes = require("./routes/adminRoute");
 const orderRouter = require("./routes/orderRoute");
@@ -101,42 +137,6 @@ app.listen(port, (error) => {
   } else {
     console.log("Error: " + error);
   }
-});
-
-
-// Helmet for Security
-app.use(helmet({
-  hsts: {
-      maxAge: 31536000, // 1 year in seconds
-      includeSubDomains: true, // Apply HSTS to subdomains
-      preload: true,
-  },
-  contentSecurityPolicy: {
-      directives: {
-          defaultSrc: ["'self'"], 
-          scriptSrc: ["'self'",],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'","data:"],
-          connectSrc: ["'self'"],
-          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-        
-      }
-  },
-
-}))
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  next();
-});
-
-app.use((req, res, next) => {
-  res.setHeader('Referrer-Policy', 'no-referrer'); // Change this based on your needs
-  next();
-});
-
-app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()'); // Adjust as needed
-  next();
 });
 
 // Image Storage Engine
