@@ -1268,6 +1268,10 @@ app.use("/api", sellerRouter);
 app.use("/api", userRoutes);
 
 
+
+const helmet = require('helmet');
+
+
 app.use(helmet({
   hsts: {
       maxAge: 31536000, // 1 year in seconds
