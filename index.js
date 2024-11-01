@@ -9,6 +9,7 @@ const multer = require("multer");
 
 const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
+const helmet = require('helmet');
 
 // import routes
 const adminRoutes = require("./routes/adminRoute");
@@ -102,6 +103,42 @@ app.listen(port, (error) => {
   }
 });
 
+
+// Helmet for Security
+app.use(helmet({
+  hsts: {
+      maxAge: 31536000, // 1 year in seconds
+      includeSubDomains: true, // Apply HSTS to subdomains
+      preload: true,
+  },
+  contentSecurityPolicy: {
+      directives: {
+          defaultSrc: ["'self'"], 
+          scriptSrc: ["'self'",],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'","data:"],
+          connectSrc: ["'self'"],
+          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+        
+      }
+  },
+
+}))
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'no-referrer'); // Change this based on your needs
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()'); // Adjust as needed
+  next();
+});
+
 // Image Storage Engine
 const storage = multer.diskStorage({
   destination: "./upload/images",
@@ -112,6 +149,8 @@ const storage = multer.diskStorage({
     );
   },
 });
+
+
 
 const upload = multer({ storage: storage });
 
@@ -1266,42 +1305,3 @@ app.use("/api/", adminRoutes);
 app.use("/api/seller", sellerRouter);
 app.use("/api", sellerRouter);
 app.use("/api", userRoutes);
-
-
-
-const helmet = require('helmet');
-
-
-app.use(helmet({
-  hsts: {
-      maxAge: 31536000, // 1 year in seconds
-      includeSubDomains: true, // Apply HSTS to subdomains
-      preload: true,
-  },
-  contentSecurityPolicy: {
-      directives: {
-          defaultSrc: ["'self'"], 
-          scriptSrc: ["'self'",],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'","data:"],
-          connectSrc: ["'self'"],
-          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-        
-      }
-  },
-
-}))
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  next();
-});
-
-app.use((req, res, next) => {
-  res.setHeader('Referrer-Policy', 'no-referrer'); // Change this based on your needs
-  next();
-});
-
-app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()'); // Adjust as needed
-  next();
-});
