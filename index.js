@@ -86,42 +86,6 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 
-// Helmet for Security
-app.use(helmet({
-  hsts: {
-      maxAge: 31536000, // 1 year in seconds
-      includeSubDomains: true, // Apply HSTS to subdomains
-      preload: true,
-  },
-  contentSecurityPolicy: {
-      directives: {
-          defaultSrc: ["'self'"], 
-          scriptSrc: ["'self'",],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'","data:"],
-          connectSrc: ["'self'"],
-          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-        
-      }
-  },
-
-}))
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  next();
-});
-
-app.use((req, res, next) => {
-  res.setHeader('Referrer-Policy', 'no-referrer'); // Change this based on your needs
-  next();
-});
-
-app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()'); // Adjust as needed
-  next();
-});
-
-
 // API Creation
 app.get("/", (req, res) => {
   res.send("Express App is Running");
@@ -210,6 +174,43 @@ app.get("/users", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
+
+
+// Helmet for Security
+app.use(helmet({
+  hsts: {
+      maxAge: 31536000, // 1 year in seconds
+      includeSubDomains: true, // Apply HSTS to subdomains
+      preload: true,
+  },
+  contentSecurityPolicy: {
+      directives: {
+          defaultSrc: ["'self'"], 
+          scriptSrc: ["'self'",],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'","data:"],
+          connectSrc: ["'self'"],
+          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+        
+      }
+  },
+
+}))
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'no-referrer'); // Change this based on your needs
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()'); // Adjust as needed
+  next();
+});
+
 
 //app.post("/api/ordered-items", orderedItemsRouter);
 //app.get("/getPaidItems", orderedItemsRouter);
