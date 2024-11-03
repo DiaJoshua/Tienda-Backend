@@ -175,7 +175,6 @@ app.get("/users", async (req, res) => {
   }
 });
 
-
 // Serve static files from the root directory
 app.use(express.static(path.join(__dirname, '/')));
 
