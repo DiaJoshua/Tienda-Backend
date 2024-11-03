@@ -176,26 +176,38 @@ app.get("/users", async (req, res) => {
 });
 
 
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname, '/')));
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
 // Helmet for Security
 app.use(helmet({
   hsts: {
       maxAge: 31536000, // 1 year in seconds
       includeSubDomains: true, // Apply HSTS to subdomains
-      preload: true,
+      preload: true, // Allows your site to be preloaded in browsers' HSTS preload list
   },
   contentSecurityPolicy: {
       directives: {
-          defaultSrc: ["'self'"], 
-          scriptSrc: ["'self'",],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'","data:"],
-          connectSrc: ["'self'"],
-          scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-        
+          defaultSrc: ["'self'"], // Allow resources only from the current origin
+          scriptSrc: ["'self'"], // Restrict scripts to same-origin
+          styleSrc: ["'self'", "'unsafe-inline'"], // Allows inline styles - only if necessary
+          imgSrc: ["'self'", "data:"], // Restrict images to same-origin and data URIs
+          connectSrc: ["'self'"], // Restrict connections to the current origin
+          fontSrc: ["'self'", "https://fonts.googleapis.com"], // Example for allowing fonts from a trusted source
+          objectSrc: ["'none'"], // Disallow <object> and similar tags for security
+          frameAncestors: ["'none'"], // Prevents embedding of your site in an iframe
+          baseUri: ["'self'"], // Limits <base> URIs to same origin
+          formAction: ["'self'"], // Allows form submissions only to the same origin
       }
-  },
+  }
+}));
 
-}))
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   next();
@@ -211,6 +223,35 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' https://trusted-scripts.example.com; object-src 'none';");
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY'); // or 'SAMEORIGIN'
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
+
+// Serve robots.txt file
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'robots.txt'));
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'sitemap.xml'));
+});
 
 //app.post("/api/ordered-items", orderedItemsRouter);
 //app.get("/getPaidItems", orderedItemsRouter);
